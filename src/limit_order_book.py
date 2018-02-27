@@ -32,14 +32,14 @@ class Limit_Order_book(object):
         assert(len(bid) <= depth)
         self.bid = np.full(depth, -dummy)
         self.bid[:len(bid)] = bid
-        self.bid_size = np.zeors(depth)
+        self.bid_size = np.zeros(depth)
         self.bid_size[:len(bid_size)] = bid_size
 
         assert(len(ask)==len(ask_size))
         assert(len(ask) <= depth)
         self.ask = np.full(depth, dummy)
         self.ask[:len(ask)] = ask
-        self.ask_size = np.zeors(depth)
+        self.ask_size = np.zeros(depth)
         self.ask_size[:len(ask_size)] = ask_size        
 
         #Initialize own order info
