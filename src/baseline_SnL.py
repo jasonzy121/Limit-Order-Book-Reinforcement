@@ -48,7 +48,10 @@ for i in range(len(init_price)):
 			lob_copy.process(**message)
 			if lob_copy.own_amount_to_trade == 0:
 				break
-		reward[i] = lob_copy.own_reward
+		if lob_copy.own_amount_to_trade > 0:
+			reward[i] = Limit_Order_book._DUMMY_VARIABLE * args.order_direction
+		else:
+			reward[i] = lob_copy.own_reward
 
 print(init_price)
 print(reward)
