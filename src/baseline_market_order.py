@@ -31,4 +31,9 @@ while lob.own_amount_to_trade > 0 and not mq.finished():
 		if lob.own_amount_to_trade == 0:
 			break
 
-print(lob.own_reward)
+if lob.own_amount_to_trade > 0:
+	reward = Limit_Order_book._DUMMY_VARIABLE * args.order_direction
+else:
+	reward = lob.own_reward
+
+print(reward)
