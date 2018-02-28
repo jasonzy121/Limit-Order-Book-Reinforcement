@@ -21,7 +21,13 @@ class Limit_Order_book(object):
 
     _DUMMY_VARIABLE = 9999999999
 
-    def __init__(self, bid, bid_size, ask, ask_size, own_amount_to_trade=100, own_init_price=9999999999, own_trade_type=-1):
+    def __init__(self, bid=np.empty((0,), dtype=int), 
+                bid_size=np.empty((0,), dtype=int),
+                ask=np.empty((0,), dtype=int),
+                ask_size=np.empty((0,), dtype=int),
+                own_amount_to_trade=100,
+                own_init_price=9999999999,
+                own_trade_type=-1):
         """
         Initializer for LOB
         """
@@ -204,7 +210,7 @@ class Limit_Order_book(object):
             self.own_reward += order_reward
         elif direction != self.own_trade_type and executed > self.own_earlier_orders:
         	#Calculate number of our own limit order that got executed
-            self.own_reward -= self.own_price * own_executed * direction
+            self.own_reward += self.own_price * own_executed * direction
 
         return executed
 
