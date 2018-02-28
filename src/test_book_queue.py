@@ -61,3 +61,80 @@ for idx, message in mq.iterate_queue():
 			print('Current LOB: ')
 			print(lob.display_book(16))
 			break
+
+### test own order
+assert(lob.own_earlier_orders == np.sum(lob.ask_size[:-1]))
+print('Initial Own Order [SUCCESS]')
+
+lob.update_own_order(5800100)
+assert(lob.own_earlier_orders == 3237)
+assert(lob.own_amount_to_trade == 100)
+print('Update Price To Price On LOB [SUCCESS]')
+
+lob.update_own_order(5802000)
+assert(lob.own_earlier_orders == 3247)
+assert(lob.own_amount_to_trade == 100)
+print('Update Price To Price Not On LOB [SUCCESS]')
+
+lob.update_own_order(5797000)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 100)
+print('Update Price To Best Ask On LOB [SUCCESS]')
+
+lob.process(1, 10, 5796900, -1)
+assert(lob.own_earlier_orders == 10)
+assert(lob.own_amount_to_trade == 100)
+print('Insert An Sell Order With Better Ask On LOB [SUCCESS]')
+
+lob.process(1, 11, 5797000, 1)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 99)
+print('Execute An Buy Order With Same Ask [SUCCESS]')
+
+lob.update_own_order(5791900)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 24)
+print('Update Price To Best Bid [SUCCESS]')
+
+lob.process(1, 1, 5791600, 1)
+lob.process(1, 1, 5791700, 1)
+lob.process(1, 1, 5791800, 1)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 24)
+print('Insert Small Buy Orders With Better Bid On LOB [SUCCESS]')
+
+lob.update_own_order(5791500)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 21)
+print('Update Price To Execute 3 Small Buy Orders [SUCCESS]')
+
+lob.process(1, 30, 5791500, -1)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 21)
+print('Execute An Sell Order With Same Ask [SUCCESS]')
+
+lob.process(3, 15, 5791500, -1)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 21)
+print('Cancel Half Of Previous Order [SUCCESS]')
+
+lob.update_own_order(5797900)
+assert(lob.own_earlier_orders == 225)
+assert(lob.own_amount_to_trade == 21)
+print('Update Price To Second Best Ask On LOB [SUCCESS]')
+
+
+lob.process(1, 9, 5797900, -1)
+assert(lob.own_earlier_orders == 225)
+assert(lob.own_amount_to_trade == 21)
+print('Insert An Sell Order With Second Best Ask On LOB [SUCCESS]')
+
+lob.process(3, 215, 5797900, -1)
+assert(lob.own_earlier_orders == 15)
+assert(lob.own_amount_to_trade == 21)
+print('Cancel Sell Order With Second Best Ask On LOB [SUCCESS]')
+
+lob.process(1, 45, 5799500, 1)
+assert(lob.own_earlier_orders == 0)
+assert(lob.own_amount_to_trade == 0)
+print('Insert Buy Orders [SUCCESS]')

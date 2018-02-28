@@ -21,7 +21,7 @@ class Limit_Order_book(object):
 
     _DUMMY_VARIABLE = 9999999999
 
-    def __init__(self, bid, bid_size, ask, ask_size, own_amount_to_trade=0, own_init_price=9999999999, own_trade_type=-1):
+    def __init__(self, bid, bid_size, ask, ask_size, own_amount_to_trade=100, own_init_price=9999999999, own_trade_type=-1):
         """
         Initializer for LOB
         """
@@ -88,8 +88,7 @@ class Limit_Order_book(object):
         if executed < size:
             self.insert_order(size - executed, price, direction, own)
 
-
-    def delete_order(self, size, price, direction, own=False):
+    def delete_order(self, size, price, direction, own=False, cancel=True):
         """
         Delete order from the LOB and update number of orders before our own order
         """
@@ -104,12 +103,17 @@ class Limit_Order_book(object):
             else:
                 self.ask_size[index] -= size
 
-            ### did not check this part
             if price < self.own_price:
                 self.own_earlier_orders -= size
             elif price == self.own_price:
-                #if same price as our own order, only remove the earlier ones
-                self.own_earlier_orders -= min(size, self.own_earlier_orders - np.sum(self.ask_size[:index]))
+                if not own:
+                    #if same price as our own order, only remove the earlier ones
+                    else_executed = min(size, self.own_earlier_orders - np.sum(self.ask_size[:index]))
+                    self.own_earlier_orders -= else_executed
+                    if not cancel:
+                        own_executed = min(size - else_executed, self.own_amount_to_trade) 
+                        self.own_amount_to_trade -= own_executed
+                        return own_executed
 
         elif direction == 1: #delete buy order, check bid
             index = self.bid.size - np.searchsorted(self.bid[::-1], price, side='right') #self.bid is in descending order
@@ -122,16 +126,17 @@ class Limit_Order_book(object):
             else:
                 self.bid_size[index] -= size
 
-            ### did not check this part
             if price > self.own_price:
                 self.own_earlier_orders -= size
             elif price == self.own_price:
-                self.own_earlier_orders -= min(size, self.own_earlier_orders - np.sum(self.bid_size[:index]))
-
-        ### did not check this part
-        if own:
-            self.own_earlier_orders = 0
-
+                if not own:
+                    else_executed = min(size, self.own_earlier_orders - np.sum(self.bid_size[:index]))
+                    self.own_earlier_orders -= else_executed
+                    if not cancel:
+                        own_executed = min(size - else_executed, self.own_amount_to_trade) 
+                        self.own_amount_to_trade -= own_executed
+                        return own_executed
+        return 0
 
     def insert_order(self, size, price, direction, own=False):
         """
@@ -140,34 +145,34 @@ class Limit_Order_book(object):
         if direction == -1: #insert sell order, check ask
             index = np.searchsorted(self.ask, price)
             extra = 0 #track number of existing same price ones
-            if self.ask[index] == price:
-                extra += self.ask_size[index]
-                self.ask_size[index] += size
-            else: #need to insert new entry and drop the last in the LOB
+            if index == len(self.ask) or self.ask[index] != price: #need to insert new entry
                 self.ask = np.insert(self.ask, index, price)
                 self.ask_size = np.insert(self.ask_size, index, size)
+            else:
+                extra = self.ask_size[index]
+                self.ask_size[index] += size
 
             if not own: #update number of earlier orders
-                if price < self.own_price:
+                if direction == self.own_trade_type and price < self.own_price:
                     self.own_earlier_orders += size
             else: #calculate number of earlier orders
-                self.own_earlier_orders = self.ask_size[:index] + extra
+                self.own_earlier_orders = np.sum(self.ask_size[:index]) + extra
 
         elif direction == 1: #insert buy order, check bid
             index = self.bid.size - np.searchsorted(self.bid[::-1], price, side='right')
             extra = 0
-            if self.bid[index] == price:
-                extra += self.bid_size[index]
-                self.bid_size[index] += size
-            else: #insert to the right
+            if index == len(self.bid) or self.bid[index] != price:
                 self.bid = np.insert(self.bid, index, price)
                 self.bid_size = np.insert(self.bid_size, index, size)
-            	
+            else:
+                extra = self.bid_size[index]
+                self.bid_size[index] += size
+                
             if not own:
-                if price > self.own_price:
+                if direction == self.own_trade_type and price > self.own_price:
                     self.own_earlier_orders += size
             else:
-                self.own_earlier_orders = self.bid_size[:index] + extra
+                self.own_earlier_orders = np.sum(self.bid_size[:index]) + extra
 
 
     def partial_execution(self, size, price, direction, own=False):
@@ -176,19 +181,20 @@ class Limit_Order_book(object):
         """
         remaining = size #remaining number of orders to execute
         order_reward = 0.0 #reward from executing this order
+        own_executed = 0
 
         if direction == -1: #sell order, check bid
             while remaining > 0 and len(self.bid) > 0 and self.bid[0] >= price:
                 to_execute = min(remaining, self.bid_size[0])
                 order_reward += to_execute * self.bid[0]
-                self.delete_order(to_execute, self.bid[0], 1, own)#remove matched order
+                own_executed += self.delete_order(to_execute, self.bid[0], 1, own=own, cancel=False) #remove matched order
                 remaining -= to_execute
 
         elif direction == 1: #buy order, check ask
             while remaining > 0 and len(self.ask) > 0 and self.ask[0] <= price:
                 to_execute = min(remaining, self.ask_size[0])
                 order_reward -= to_execute * self.ask[0]
-                self.delete_order(to_execute, self.ask[0], -1, own)
+                own_executed += self.delete_order(to_execute, self.ask[0], -1, own=own, cancel=False)
                 remaining -= to_execute
 
         executed = size - remaining
@@ -198,11 +204,10 @@ class Limit_Order_book(object):
             self.own_reward += order_reward
         elif direction != self.own_trade_type and executed > self.own_earlier_orders:
         	#Calculate number of our own limit order that got executed
-            own_executed = min(self.own_amount_to_trade, executed - self.own_earlier_orders)
-            self.own_amount_to_trade -= own_executed
             self.own_reward -= self.own_price * own_executed * direction
 
         return executed
+
 
     def display_book(self, level):
         bid = np.pad(self.bid, [0, max(0,level-self.bid.size)], 'constant', constant_values=-self._DUMMY_VARIABLE)[:level][:,np.newaxis]
