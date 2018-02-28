@@ -56,7 +56,7 @@ class Limit_Order_book(object):
         self.own_earlier_orders = 0 #Total number of limit orders before us, including same price but earlier orders
 
         #Add our own limit order to the LOB
-        self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, True)
+        self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
 
 
     def update_own_order(self, price):
@@ -64,9 +64,9 @@ class Limit_Order_book(object):
         Helper to update our own order info, only need the new price
         """
         if price != self.own_price: #Only need to update if different price
-            self.delete_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, True)
+            self.delete_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
             self.own_price = price
-            self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, True)
+            self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
 
 
     def process(self, type, size, price, direction):
@@ -79,11 +79,11 @@ class Limit_Order_book(object):
         Type 5: Execution of a hidden limit order, ignored since unobservable
         """
         if type == 1:
-            self.add_order(size, price, direction, False)
+            self.add_order(size, price, direction, own=False)
         elif type == 2 or type == 3:
-            self.delete_order(size, price, direction, False)
+            self.delete_order(size, price, direction, own=False)
         elif type == 4:
-            self.add_order(size, price, -direction, False)
+            self.add_order(size, price, -direction, own=False)
 
 
     def add_order(self, size, price, direction, own=False):
@@ -100,8 +100,19 @@ class Limit_Order_book(object):
         """
         if direction == -1: #delete sell order, check ask
             index = np.searchsorted(self.ask, price) #self.ask is in ascending order
-            assert(self.ask[index] == price)
-            assert(self.ask_size[index] >= size)
+            if cancel and not own and direction == self.own_trade_type:
+                try:
+                    assert(self.ask[index] == price)
+                    if self.own_price == price:
+                        assert(self.ask_size[index] - self.own_amount_to_trade >= size)
+                    else:
+                        assert(self.ask_size[index] >= size)
+                except:
+                    return 0
+            else:
+                assert(self.ask[index] == price)
+                assert(self.ask_size[index] >= size)
+
 
             if self.ask_size[index] == size: # have to remove the entry and add dummy if remove whole order
                 self.ask = np.delete(self.ask, index)
@@ -123,8 +134,18 @@ class Limit_Order_book(object):
 
         elif direction == 1: #delete buy order, check bid
             index = self.bid.size - np.searchsorted(self.bid[::-1], price, side='right') #self.bid is in descending order
-            assert(self.bid[index] == price)
-            assert(self.bid_size[index] >= size)
+            if cancel and not own and direction == self.own_trade_type:
+                try:
+                    assert(self.bid[index] == price)
+                    if self.own_price == price:
+                        assert(self.bid_size[index] - self.own_amount_to_trade >= size)
+                    else:
+                        assert(self.bid_size[index] >= size)
+                except:
+                    return 0
+            else:
+                assert(self.bid[index] == price)
+                assert(self.bid_size[index] >= size)
 
             if self.bid_size[index] == size:
                 self.bid = np.delete(self.bid, index)
