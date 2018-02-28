@@ -100,10 +100,10 @@ class Limit_Order_book(object):
         """
         if direction == -1: #delete sell order, check ask
             index = np.searchsorted(self.ask, price) #self.ask is in ascending order
-            if cancel and not own and direction == self.own_trade_type:
+            if cancel and not own:
                 try:
                     assert(self.ask[index] == price)
-                    if self.own_price == price:
+                    if self.own_price == price and direction == self.own_trade_type:
                         assert(self.ask_size[index] - self.own_amount_to_trade >= size)
                     else:
                         assert(self.ask_size[index] >= size)
@@ -134,10 +134,10 @@ class Limit_Order_book(object):
 
         elif direction == 1: #delete buy order, check bid
             index = self.bid.size - np.searchsorted(self.bid[::-1], price, side='right') #self.bid is in descending order
-            if cancel and not own and direction == self.own_trade_type:
+            if cancel and not own:
                 try:
                     assert(self.bid[index] == price)
-                    if self.own_price == price:
+                    if self.own_price == price and direction == self.own_trade_type:
                         assert(self.bid_size[index] - self.own_amount_to_trade >= size)
                     else:
                         assert(self.bid_size[index] >= size)
