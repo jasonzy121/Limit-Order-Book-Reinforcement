@@ -59,10 +59,12 @@ class Limit_Order_book(object):
         self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
 
 
-    def update_own_order(self, price, amount = self.own_amount_to_trade):
+    def update_own_order(self, price, amount = None):
         """
         Helper to update our own order info, only need the new price
         """
+        if amount is None:
+            amount = self.own_amount_to_trade
         if price != self.own_price: #Only need to update if different price
             self.delete_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
             self.own_price = price
