@@ -31,5 +31,4 @@ while lob.own_amount_to_trade > 0 and not mq.finished():
 		if lob.own_amount_to_trade == 0:
 			break
 
-print(lob.display_book(16))
 print(lob.own_reward)

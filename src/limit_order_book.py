@@ -210,7 +210,7 @@ class Limit_Order_book(object):
             self.own_reward += order_reward
         elif direction != self.own_trade_type and executed > self.own_earlier_orders:
         	#Calculate number of our own limit order that got executed
-            self.own_reward -= self.own_price * own_executed * direction
+            self.own_reward += self.own_price * own_executed * direction
 
         return executed
 
