@@ -11,9 +11,9 @@ class Message_Queue(object):
 		self._header2idx = {tmp:idx for idx, tmp in enumerate(self._idx2header)}
 
 	def iterate_queue(self):
-		for idx, row in self._df.iterrows():
+		for idx, row in self._df.iloc[(self._row_idx+1):].iterrows():
 			message = self._create_message(row)
-			self._row_idx = idx
+			self._row_idx += 1
 			self._time = row[0]
 			yield (idx, message)
 
@@ -27,6 +27,9 @@ class Message_Queue(object):
 			else:
 				break
 		self._time = time
+
+	def finished(self):
+		return (self._row_idx+1==self._message_count)
 
 	def _create_message(self, row):
 		order_type = int(row[1])
