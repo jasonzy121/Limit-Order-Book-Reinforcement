@@ -56,19 +56,23 @@ class Limit_Order_book(object):
         self.own_earlier_orders = 0 #Total number of limit orders before us, including same price but earlier orders
 
         #Add our own limit order to the LOB
-        self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
+        if self.own_amount_to_trade > 0:
+            self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
 
 
     def update_own_order(self, price, amount = None):
         """
         Helper to update our own order info, only need the new price
         """
-        if amount is None:
-            amount = self.own_amount_to_trade
-        if price != self.own_price: #Only need to update if different price
-            self.delete_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
+        
+        if price != self.own_price or ((amount is not None) and (amount !=self.own_amount_to_trade)): #Only need to update if different price
+            if self.own_amount_to_trade > 0:
+                self.delete_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
             self.own_price = price
-            self.add_order(amont, self.own_price, self.own_trade_type, own=True)
+            if amount is not None:
+                self.own_amount_to_trade = amount
+            if self.own_amount_to_trade > 0:
+                self.add_order(amont, self.own_price, self.own_trade_type, own=True)
 
 
     def process(self, type, size, price, direction):
@@ -100,6 +104,9 @@ class Limit_Order_book(object):
         """
         Delete order from the LOB and update number of orders before our own order
         """
+        if size <= 0:
+            return 0
+
         if direction == -1: #delete sell order, check ask
             index = np.searchsorted(self.ask, price) #self.ask is in ascending order
             if cancel and not own:
