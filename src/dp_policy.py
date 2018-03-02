@@ -41,7 +41,7 @@ def Calculate_Q(V, H, T, I, L):
             real_time= real_times[k]
             episode_states = get_state(episode[0])
             prices = generate_prices(episode[0], L)
-            for i in range(1, I):
+            for i in range(I):
                 for a in range(L):
                     a_price = prices[a]
                     episode_next_state = get_state(episode[1])
