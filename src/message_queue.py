@@ -38,3 +38,31 @@ class Message_Queue(object):
 		order_direction = int(row[5])
 		message = {'type':order_type, 'size':order_size, 'price':order_price, 'direction':order_direction}
 		return message
+
+	def reset(self):
+		self._time = 34200.0
+		self._row_idx = -1
+
+	def jump_to_time(self, time):
+		if time >= self._df.iloc[self._message_count-1][0]:
+			self._time = time
+			self._row_idx = self._message_count-1
+		elif time < self._df.iloc[0][0]:
+			self._time = 34200.0
+			self._row_idx = -1
+		else:
+			idx_start = 0
+			idx_end = 0
+			d_idx = 1
+			while time >= self._df.iloc[idx_end][0]:
+				idx_start = idx_end
+				idx_end += d_idx
+				d_idx *= 2
+			while idx_end - idx_start > 1:
+				idx_mid = idx_start + (idx_end - idx_start) // 2
+				if time >= self._df.iloc[idx_mid][0]:
+					idx_start = idx_mid
+				else:
+					idx_end = idx_mid
+			self._row_idx = idx_start
+			self._time = time
