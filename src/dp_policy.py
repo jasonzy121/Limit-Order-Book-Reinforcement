@@ -18,6 +18,7 @@ parser.add_argument('--spread_cutoff', default=1.0, help='Cutoff for low bid-ask
 parser.add_argument('--start', default=34201, help='Start Time', type=float)
 parser.add_argument('--end', default=34300, help='End Time', type=float)
 args = parser.parse_args()
+
 def Calculate_Q(V, H, T, I, L):
     """
     Q is indexed by states and actions, where states include time_step T 
@@ -84,7 +85,7 @@ def read_order_book(time, H):
     real_time= args.start+time
     while real_time<args.end:
         mq= Message_Queue(args.file_msg)
-        output.append(order.create_message_time(real_time, mq))
+        output.append(order.create_orderbook_time(real_time, mq))
         time_output.append(real_time)
         real_time= real_time+H
     return output, time_output
