@@ -56,7 +56,7 @@ class Message_Queue(object):
 			d_idx = 1
 			while time >= self._df.iloc[idx_end][0]:
 				idx_start = idx_end
-				idx_end += d_idx
+				idx_end = min(idx_end+d_idx, self._message_count-1)
 				d_idx *= 2
 			while idx_end - idx_start > 1:
 				idx_mid = idx_start + (idx_end - idx_start) // 2
