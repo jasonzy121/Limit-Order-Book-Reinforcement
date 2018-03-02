@@ -66,3 +66,4 @@ class Message_Queue(object):
 					idx_end = idx_mid
 			self._row_idx = idx_start
 			self._time = time
+

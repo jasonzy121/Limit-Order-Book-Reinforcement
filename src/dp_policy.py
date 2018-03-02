@@ -10,8 +10,7 @@ n_state = 2
 states_len = [2, 3]
 
 parser = argparse.ArgumentParser(description='Dynamic Programming Algorithm')
-parser.add_argument('--file_msg', default= '../datasets/GOOG_2012-06-21_34200000_57600000_message_10.csv', help='Message File Path')
-parser.add_argument('--file_order', default= '../datasets/GOOG_2012-06-21_34200000_57600000_orderbook_10.csv', help= 'Order File Path')
+parser.add_argument('--tic', default= 'GOOG', help='Company Ticker')
 parser.add_argument('--base_point', default=100, help='Base Point', type=int)
 parser.add_argument('--order_direction', default=-1, help='Buy 1, Sell -1', type=int)
 parser.add_argument('--spread_cutoff', default=10.0, help='Cutoff for low bid-ask spread/high spread', type=float)
@@ -24,8 +23,11 @@ parser.add_argument('--T', default=20, help='Time steps', type=int)
 parser.add_argument('--V', default=100, help='Amount to trade', type=int)
 parser.add_argument('--I', default=10, help='Inventory Length', type=int)
 parser.add_argument('--L', default=10, help='Action Length', type=int)
+parser.add_argument('--mode', default='train', help='Mode: train or test')
 args = parser.parse_args()
 
+file_msg = '../datasets/%s_2012-06-21_34200000_57600000_message_10.csv' % (args.tic)
+file_order = '../datasets/%s_2012-06-21_34200000_57600000_orderbook_10.csv' % (args.tic)
 
 def Calculate_Q(V, H, T, I, L, oq, mq):
     """
@@ -100,7 +102,7 @@ def read_order_book(time, H, oq, mq):
     time_output = []
     real_time = args.train_start + time
     while real_time < args.train_end:
-        mq = mq.reset()
+        mq.reset()
         output.append(oq.create_orderbook_time(real_time, mq))
         time_output.append(real_time)
         real_time= real_time + H
@@ -130,7 +132,7 @@ def simulate(lob, amount, a_price, time, next_time, mq):
     simulate to next state, we need to calculate the remaining inventory given the current i and price a, and the immediate reward
     (revenue from the executed orders)
     """
-    mq = mq.reset()
+    mq.reset()
     mq.jump_to_time(time)
 
     lob_copy = copy.deepcopy(lob)
@@ -143,10 +145,13 @@ def simulate(lob, amount, a_price, time, next_time, mq):
 
     return [lob_copy.own_amount_to_trade, lob_copy.own_reward]
 
-oq = Order_Queue(args.file_order)
-mq = Message_Queue(args.file_msg)
-path_target = '../data/Q_dp.npy'
-np.save(path_target, Calculate_Q(args.V, args.H, args.T, args.I, args.L,oq,mq))
+if args.mode == 'train':
+    oq = Order_Queue(file_order)
+    mq = Message_Queue(file_msg)
+    path_target = '../data/%s_Q_dp.npy' % (args.tic)
+    np.save(path_target, Calculate_Q(args.V, args.H, args.T, args.I, args.L,oq,mq))
+elif args.mode == 'test':
+    pass
 
 
 
