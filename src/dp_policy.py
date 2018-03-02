@@ -26,7 +26,8 @@ parser.add_argument('--I', default=10, help='Horizon', type=int)
 parser.add_argument('--L', default=10, help='Horizon', type=int)
 args = parser.parse_args()
 
-def Calculate_Q(V, H, T, I, L):
+
+def Calculate_Q(V, H, T, I, L, oq, mq):
     """
     Q is indexed by states and actions, where states include time_step T 
     (need to calculate 0 to T, T+1 is left with 0s), inventory I, and 
@@ -43,10 +44,11 @@ def Calculate_Q(V, H, T, I, L):
         load_episodes will load the current orderbook at time H*(t/T)
         and the orderbook at next time step H*(t+1)/T
         """
-        episodes, real_times = load_episodes(time, next_time, H, V)
+        episodes, real_times = load_episodes(time, next_time, H, V, oq, mq)
         for k in range(len(episodes)):
-            episode= episodes[k] 
-            real_time= real_times[k]
+            episode = episodes[k] 
+            real_time = real_times[k]
+            print real_time
             episode_states = get_state(episode[0])
             prices = generate_prices(episode[0], L)
             for i in range(I):
@@ -54,10 +56,10 @@ def Calculate_Q(V, H, T, I, L):
                     a_price = prices[a]
                     if t == T:
                         episode_next_state = get_state(episode[0])
-                        episode_next_i, im_reward = simulate(episode[0], int((i+1)*V/I) , a_price, real_time[0], real_time[0])
+                        episode_next_i, im_reward = simulate(episode[0], int((i+1)*V/I) , a_price, real_time[0], real_time[0], mq)
                     else:
                         episode_next_state = get_state(episode[1])
-                        episode_next_i, im_reward = simulate(episode[0], int((i+1)*V/I) , a_price, real_time[0], real_time[1])
+                        episode_next_i, im_reward = simulate(episode[0], int((i+1)*V/I) , a_price, real_time[0], real_time[1], mq)
 
                     episode_next_i = int(episode_next_i/V*I)-1 # Have to change new order_size into inventory units.
                     max_Q = np.amax(Q[t+1, episode_next_i, episode_next_state[0], episode_next_state[1], :])
@@ -77,31 +79,30 @@ def Optimal_strategy(Q):
         return np.argmin(Q, axis=len(Q.shape)-1)
 
 
-def load_episodes(time, next_time, H, V):
-    lob1_data, time_1 = read_order_book(time, H)
-    print (lob1_data[0])
+def load_episodes(time, next_time, H, V, oq, mq):
+    lob1_data, time_1 = read_order_book(time, H, oq, mq)
     lob1 = [Limit_Order_book(**lob_data, own_amount_to_trade = 0, 
                     own_init_price=-args.order_direction*Limit_Order_book._DUMMY_VARIABLE,
                     own_trade_type=args.order_direction) for lob_data in lob1_data]
 
-    lob2_data, time_2 = read_order_book(next_time, H)
+    lob2_data, time_2 = read_order_book(next_time, H, oq, mq)
     lob2 = [Limit_Order_book(**lob_data, own_amount_to_trade = 0,
                     own_init_price=-args.order_direction*Limit_Order_book._DUMMY_VARIABLE,
                     own_trade_type=args.order_direction) for lob_data in lob2_data]
     return list(zip(lob1, lob2)), list(zip(time_1, time_2))
 
 
-def read_order_book(time, H):
+def read_order_book(time, H, oq, mq):
     """
     read the initial limit order book states from the file
     """
     output = []
     time_output = []
-    order = Order_Queue(args.file_order)
+    order = copy.deepcopy(oq)
     real_time = args.train_start + time
     while real_time < args.train_end:
-        mq = Message_Queue(args.file_msg)
-        output.append(order.create_orderbook_time(real_time, mq))
+        mq_copy = copy.deepcopy(mq)
+        output.append(order.create_orderbook_time(real_time, _copy))
         time_output.append(real_time)
         real_time= real_time + H
     return output, time_output
@@ -125,25 +126,27 @@ def get_state(lob):
     state2 = np.sign(lob.ask_size[0] - lob.bid_size[0])
     return [state1, state2]
 
-def simulate(lob, amount, a_price, time, next_time):
+def simulate(lob, amount, a_price, time, next_time, mq):
     """
     simulate to next state, we need to calculate the remaining inventory given the current i and price a, and the immediate reward
     (revenue from the executed orders)
     """
-    mq = Message_Queue(args.file_msg)
-    for idx, msg in mq.pop_to_next_time(time):
+    mq_copy = copy.deepcopy(mq)
+    for idx, msg in mq_copy.pop_to_next_time(time):
         pass
 
     lob_copy = copy.deepcopy(lob)
     lob_copy.update_own_order(a_price, amount)
 
-    for idx, message in mq.pop_to_next_time(next_time):
+    for idx, message in mq_copy.pop_to_next_time(next_time):
         lob_copy.process(**message)
         if lob_copy.own_amount_to_trade == 0:
             break
 
     return [lob_copy.own_amount_to_trade, lob_copy.own_reward]
 
+oq = Order_Queue(args.file_order)
+mq = Message_Queue(args.file_msg)
 path_target = '../data/Q_dp.npy'
 np.save(path_target, Calculate_Q(args.V, args.H, args.T, args.I, args.L))
 
