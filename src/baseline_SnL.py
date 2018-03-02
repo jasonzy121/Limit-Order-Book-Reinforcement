@@ -6,15 +6,16 @@ from limit_order_book import Limit_Order_book
 from message_queue import Message_Queue
 
 parser = argparse.ArgumentParser(description='Dynamic Programming Solution')
-parser.add_argument('--file_msg', help='Message File Path')
+parser.add_argument('--file_msg', default= '../datasets/GOOG_2012-06-21_34200000_57600000_message_10.csv',help='Message File Path')
 parser.add_argument('--base_size', default=1, help='Base Order Size', type=int)
-parser.add_argument('--order_size', default=12, help='Order Size', type=int)
+parser.add_argument('--order_size', default=1200, help='Order Size', type=int)
 parser.add_argument('--order_direction', default=1, help='Buy 1, Sell -1', type=int)
-parser.add_argument('--start', default=34200, help='Start Time', type=float)
+parser.add_argument('--start', default=34201, help='Start Time', type=float)
 parser.add_argument('--end', default=34500, help='End Time', type=float)
-parser.add_argument('--base_point', default=100, help='Base Point', type=int)
+parser.add_argument('--base_point', default=10, help='Base Point', type=int)
 parser.add_argument('--adj_freq', default=100, help='Adjustment Frequency', type=float)
-parser.add_argument('--tol', default=1e-8, help='Remaining Time To Submit Market Order', type=float)
+parser.add_argument('--tol', default=10, help='Remaining Time To Submit Market Order', type=float)
+parser.add_argument('--num', default= 100, help= 'The number of base points to go', type= int)
 args = parser.parse_args()
 
 mq = Message_Queue(args.file_msg)
@@ -25,7 +26,7 @@ for idx, message in mq.pop_to_next_time(args.start):
 	lob.process(**message)
 
 current_mid_price = lob.bid[0] + (lob.ask[0] - lob.bid[0]) // 2
-init_price = np.arange(current_mid_price-10*args.base_point, current_mid_price+10*args.base_point, args.base_point)
+init_price = np.arange(current_mid_price-args.num*args.base_point, current_mid_price+args.num*args.base_point, args.base_point)
 init_price = init_price[init_price > 0]
 
 reward = np.zeros(init_price.shape)
@@ -54,4 +55,4 @@ for i in range(len(init_price)):
 			reward[i] = lob_copy.own_reward
 
 print(init_price)
-print(reward)
+print(max(reward))
