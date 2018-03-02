@@ -18,7 +18,7 @@ parser.add_argument('--spread_cutoff', default=10.0, help='Cutoff for low bid-as
 parser.add_argument('--train_start', default=34200, help='Train Start Time', type=float)
 parser.add_argument('--train_end', default=46800, help='Train End Time', type=float)
 parser.add_argument('--test_start', default=46800, help='Test End Time', type=float)
-parser.add_argument('--train_end', default=57600, help='Test End Time', type=float)
+parser.add_argument('--test_end', default=57600, help='Test End Time', type=float)
 parser.add_argument('--H', default=600, help='Horizon', type=float)
 parser.add_argument('--T', default=20, help='Horizon', type=int)
 parser.add_argument('--V', default=100, help='Horizon', type=int)
