@@ -10,7 +10,7 @@ class Order_Queue(object):
 	def create_orderbook_time(self, time, mq):
 		mq.jump_to_time(time)
 		self._row_idx= mq._row_idx
-		row= self._df.iloc[self._row_idx]
+		row = self._df.iloc[self._row_idx]
 		return self._create_orderbook(row)
 
 	def _create_orderbook(self, row):

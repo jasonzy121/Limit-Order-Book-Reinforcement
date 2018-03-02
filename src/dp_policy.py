@@ -20,10 +20,10 @@ parser.add_argument('--train_end', default=46800, help='Train End Time', type=fl
 parser.add_argument('--test_start', default=46800, help='Test End Time', type=float)
 parser.add_argument('--test_end', default=57600, help='Test End Time', type=float)
 parser.add_argument('--H', default=600, help='Horizon', type=float)
-parser.add_argument('--T', default=20, help='Horizon', type=int)
-parser.add_argument('--V', default=100, help='Horizon', type=int)
-parser.add_argument('--I', default=10, help='Horizon', type=int)
-parser.add_argument('--L', default=10, help='Horizon', type=int)
+parser.add_argument('--T', default=20, help='Time steps', type=int)
+parser.add_argument('--V', default=100, help='Amount to trade', type=int)
+parser.add_argument('--I', default=10, help='Inventory Length', type=int)
+parser.add_argument('--L', default=10, help='Action Length', type=int)
 args = parser.parse_args()
 
 
@@ -98,11 +98,10 @@ def read_order_book(time, H, oq, mq):
     """
     output = []
     time_output = []
-    order = copy.deepcopy(oq)
     real_time = args.train_start + time
     while real_time < args.train_end:
-        mq_copy = copy.deepcopy(mq)
-        output.append(order.create_orderbook_time(real_time, mq_copy))
+        mq = mq.reset()
+        output.append(oq.create_orderbook_time(real_time, mq))
         time_output.append(real_time)
         real_time= real_time + H
     return output, time_output
@@ -131,14 +130,13 @@ def simulate(lob, amount, a_price, time, next_time, mq):
     simulate to next state, we need to calculate the remaining inventory given the current i and price a, and the immediate reward
     (revenue from the executed orders)
     """
-    mq_copy = copy.deepcopy(mq)
-    for idx, msg in mq_copy.pop_to_next_time(time):
-        pass
+    mq = mq.reset()
+    mq.jump_to_time(time)
 
     lob_copy = copy.deepcopy(lob)
     lob_copy.update_own_order(a_price, amount)
 
-    for idx, message in mq_copy.pop_to_next_time(next_time):
+    for idx, message in mq.pop_to_next_time(next_time):
         lob_copy.process(**message)
         if lob_copy.own_amount_to_trade == 0:
             break
