@@ -12,7 +12,7 @@ class Order_Queue(object):
 			pass
 		self._row_idx= mq._row_idx
 		row= self._df.iloc[self._row_idx]
-		return self._orderbook(row)
+		return self._create_orderbook(row)
 
 	def _create_orderbook(self, row):
 		len_row= int(len(row)/4)

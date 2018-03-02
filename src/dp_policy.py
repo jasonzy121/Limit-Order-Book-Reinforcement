@@ -128,7 +128,7 @@ def simulate(lob, amount, a_price, time, next_time):
 
     return [lob_copy.own_amount_to_trade, lob_copy.own_reward]
 
-print (np.max(Calculate_Q(12, 10, 4, 2, 5)))
+print (np.min(Calculate_Q(12, 10, 4, 2, 5)))
 #V, H, T, I, L
 
 
