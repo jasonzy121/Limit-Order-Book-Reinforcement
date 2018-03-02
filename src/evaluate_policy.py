@@ -48,7 +48,7 @@ def simulate_reward(lob, amount, T, H, action, time, mq, tol):
 
 	lob_copy = copy.deepcopy(lob)
 
-	for t in range(time, time + H - H//T, H//T):
+	for t in range(time, time + H, H//T):
 		price = action(time + H - t, amount, lob_copy)
 		lob_copy.update_own_order(price, amount)
 
@@ -59,21 +59,11 @@ def simulate_reward(lob, amount, T, H, action, time, mq, tol):
 
 		amount = lob_copy.own_amount_to_trade
 
-	t = time + H - H/T
-	price = action(time + H - t, amount, lob_copy)
-	lob_copy.update_own_order(price, amount)
-
-	for idx, message in mq.pop_to_next_time(t + H//T - tol):
-		lob_copy.process(**message)
-		if lob_copy.own_amount_to_trade == 0:
-			return lob_copy.own_reward
-
 	lob_copy.update_own_order(lob_copy.own_trade_type*Limit_Order_book._DUMMY_VARIABLE)
-	for idx, message in mq_copy.pop_to_next_time(time+H):
-		lob_copy.process(**message)
-		if lob_copy.own_amount_to_trade == 0:
-			return lob_copy.own_reward
-	if lob_copy.own_amount_to_trade > 0:
-		return Limit_Order_book._DUMMY_VARIABLE * args.order_direction
+	if lob_copy.own_amount_to_trade > 0 and lob.lob_copy.own_trade_type = 1:
+		return -Limit_Order_book._DUMMY_VARIABLE
 	else:
 		return lob_copy.own_reward
+
+
+		

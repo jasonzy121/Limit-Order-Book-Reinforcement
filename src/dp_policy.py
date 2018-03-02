@@ -77,10 +77,7 @@ def Optimal_strategy(Q):
 	"""
 	return argmax of each Q along the last axis (action)
 	"""
-	if args.order_direction == -1:
-		return np.argmax(Q, axis=len(Q.shape)-1)
-	elif args.order_direction == 1:
-		return np.argmin(Q, axis=len(Q.shape)-1)
+	return np.argmax(Q, axis=len(Q.shape)-1)
 
 def Optimal_action(remaining_time, amount, lob_copy):
 	t = int((args.H - remaining_time) / args.H * args.T)
