@@ -72,7 +72,7 @@ class Limit_Order_book(object):
             if amount is not None:
                 self.own_amount_to_trade = amount
             if self.own_amount_to_trade > 0:
-                self.add_order(amont, self.own_price, self.own_trade_type, own=True)
+                self.add_order(self.own_amount_to_trade, self.own_price, self.own_trade_type, own=True)
 
 
     def process(self, type, size, price, direction):
