@@ -48,7 +48,7 @@ def Calculate_Q(V, H, T, I, L, oq, mq):
         for k in range(len(episodes)):
             episode = episodes[k] 
             real_time = real_times[k]
-            print real_time
+            print(real_time)
             episode_states = get_state(episode[0])
             prices = generate_prices(episode[0], L)
             for i in range(I):
@@ -102,7 +102,7 @@ def read_order_book(time, H, oq, mq):
     real_time = args.train_start + time
     while real_time < args.train_end:
         mq_copy = copy.deepcopy(mq)
-        output.append(order.create_orderbook_time(real_time, _copy))
+        output.append(order.create_orderbook_time(real_time, mq_copy))
         time_output.append(real_time)
         real_time= real_time + H
     return output, time_output
@@ -148,7 +148,7 @@ def simulate(lob, amount, a_price, time, next_time, mq):
 oq = Order_Queue(args.file_order)
 mq = Message_Queue(args.file_msg)
 path_target = '../data/Q_dp.npy'
-np.save(path_target, Calculate_Q(args.V, args.H, args.T, args.I, args.L))
+np.save(path_target, Calculate_Q(args.V, args.H, args.T, args.I, args.L,oq,mq))
 
 
 
