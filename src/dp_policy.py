@@ -25,7 +25,6 @@ parser.add_argument('--V', default=100, help='Amount to trade', type=int)
 parser.add_argument('--I', default=10, help='Inventory Length', type=int)
 parser.add_argument('--L', default=10, help='Action Length', type=int)
 parser.add_argument('--mode', default='train', help='Mode: train or test')
-parser.add_argument('--tol', default=10, help='Remaining Time To Submit Market Order', type=float)
 args = parser.parse_args()
 
 file_msg = '../datasets/%s_2012-06-21_34200000_57600000_message_10.csv' % (args.tic)
@@ -161,7 +160,7 @@ if args.mode == 'train':
 elif args.mode == 'test':
 	Q = np.load(path_target)
 	Optimal_Q = Optimal_strategy(Q)
-	rewards = evaluate_policy(args.test_start, args.test_end, args.order_direction, args.V, args.H, args.T, oq, mq, Optimal_action, args.tol)
+	rewards = evaluate_policy(args.test_start, args.test_end, args.order_direction, args.V, args.H, args.T, oq, mq, Optimal_action)
 	print(rewards)
 	print(np.mean(rewards))
 

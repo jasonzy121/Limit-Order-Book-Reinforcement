@@ -5,13 +5,13 @@ from limit_order_book import Limit_Order_book
 from message_queue import Message_Queue
 from order_queue import Order_Queue
 
-def evaluate_policy(test_start, test_end, order_direction, V, H, T, oq, mq, action, tol):
+def evaluate_policy(test_start, test_end, order_direction, V, H, T, oq, mq, action):
 	rewards = []
 	episodes, real_times = load_episodes(test_start, test_end, order_direction, H, oq, mq)
 	for k in range(len(episodes)):
 		episode = episodes[k] 
 		real_time = real_times[k]
-		rewards.append(simulate_reward(episode, V, T, H, action, real_time, mq, tol))
+		rewards.append(simulate_reward(episode, V, T, H, action, real_time, mq))
 	return rewards
 
 
@@ -38,7 +38,7 @@ def read_order_book(test_start, test_end, H, oq, mq):
 	return output, time_output
 
 
-def simulate_reward(lob, amount, T, H, action, time, mq, tol):
+def simulate_reward(lob, amount, T, H, action, time, mq):
 	"""
 	simulate to next state, we need to calculate the remaining inventory given the current i and price a, and the immediate reward
 	(revenue from the executed orders)
@@ -60,10 +60,9 @@ def simulate_reward(lob, amount, T, H, action, time, mq, tol):
 		amount = lob_copy.own_amount_to_trade
 
 	lob_copy.update_own_order(lob_copy.own_trade_type*Limit_Order_book._DUMMY_VARIABLE)
-	if lob_copy.own_amount_to_trade > 0 and lob.lob_copy.own_trade_type = 1:
+	if lob_copy.own_amount_to_trade > 0 and lob_copy.own_trade_type == 1:
 		return -Limit_Order_book._DUMMY_VARIABLE
 	else:
 		return lob_copy.own_reward
 
 
-		
