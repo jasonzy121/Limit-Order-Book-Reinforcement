@@ -244,6 +244,12 @@ class Limit_Order_book(object):
 
         return executed
 
+    def get_mid_price(self):
+        if self.bid[0] < self._DUMMY_VARIABLE and self.ask[0] > -self._DUMMY_VARIABLE:
+            return (self.ask[0] - self.bid[0]) // 2 + self.bid[0]
+        if self.bid[0] < self._DUMMY_VARIABLE:
+            return self.bid[0]
+        return self.ask[0]
 
     def display_book(self, level):
         bid = np.pad(self.bid, [0, max(0,level-self.bid.size)], 'constant', constant_values=-self._DUMMY_VARIABLE)[:level][:,np.newaxis]
