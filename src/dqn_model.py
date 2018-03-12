@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
+import os
 
 from config import Config
 from model_base import model
@@ -81,9 +82,13 @@ class DQN(model):
 
 	def initialize(self):
 		self.sess = tf.Session()
-		self.sess.run(tf.global_variables_initializer())
-		self.sess.run(self.update_target_op)
 		self.saver = tf.train.Saver()
+		if self._config.mode == 'train':
+			self.sess.run(tf.global_variables_initializer())
+		elif self._config.mode == 'test':
+			self.saver.restore(self.sess, tf.train.latest_checkpoint(self._config.model_output))
+		self.sess.run(self.update_target_op)
+
 
 	def train(self):
 		self.sampling_buffer()

@@ -1,5 +1,7 @@
 class Config:
 	def __init__(self):
+		self.mode = 'train'
+
 		self.nsteps_train = 1000000
 		self.print_freq = 50
 		self.target_update_freq = 1000
@@ -31,7 +33,10 @@ class Config:
 		self.base_point = 100
 		self.train_start = 34200
 		self.train_end = 46800
-		self.I = 200000
+		self.test_start= 46800
+		self.test_end= 57600
+		self.I = 4000
+		self.hidden_size= 10
 
 		self.state_shape = [self.depth, 4]
 		self.state_history = 2
