@@ -22,6 +22,7 @@ class Neural_DQN(DQN):
 
 if __name__ == '__main__':
 	config = Config()
+	config.model_output= '../output/neural_net'
 	model = Neural_DQN(config)
 	model.initialize()
 	model.train()

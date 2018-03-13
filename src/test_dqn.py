@@ -17,11 +17,12 @@ from limit_order_book import Limit_Order_book
 from message_queue import Message_Queue
 from order_queue import Order_Queue
 from dqn_model import DQN
+from Neural_Net import Neural_DQN
 
 
 def evaluate_policy(m, oq, mq):
 	rewards = []
-	test_start, test_end, order_direction, V, H, T,depth= m._config.test_start, m._config.test_end, m._config.direction,\
+	test_start, test_end, order_direction, V, H, T, depth= m._config.test_start, m._config.test_end, m._config.direction,\
 	m._config.I, m._config.H, m._config.T, m._config.depth
 	episodes, real_times = load_episodes(test_start, test_end, order_direction, H, oq, mq)
 	for k in range(len(episodes)):
@@ -32,7 +33,7 @@ def evaluate_policy(m, oq, mq):
 			H, real_time, order_direction,
 			m.get_random_action_fn(), depth)
 		print (reward)
-		rewards.append(reward[-1])
+		rewards.append(np.sum(reward))
 		# Only append the final reward
 	return rewards
 
@@ -61,8 +62,9 @@ def read_order_book(test_start, test_end, H, oq, mq):
 
 def main():
 	config = Config()
+	config.model_output= '../output/neural_net'
 	config.mode= 'test'
-	model = DQN(config)
+	model = Neural_DQN(config)
 	oq = Order_Queue(config.order_path)
 	mq = Message_Queue(config.message_path)
 	rewards= evaluate_policy(model, oq, mq)

@@ -35,7 +35,7 @@ class Config:
 		self.train_end = 46800
 		self.test_start= 46800
 		self.test_end= 57600
-		self.I = 4000
+		self.I = 8000
 		self.hidden_size= 10
 
 		self.state_shape = [self.depth, 4]
