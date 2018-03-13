@@ -18,6 +18,7 @@ class Neural_DQN(DQN):
 			conv_2 = layers.conv2d(inputs=conv_1, num_outputs=4, kernel_size=[3,3], stride=[1,1], activation_fn=tf.nn.relu, padding='same')
 			conv_2_flattened = layers.flatten(inputs=conv_2)
 			state_out = tf.concat([conv_2_flattened, state_it], axis=1)
+			state_out= tf.nn.dropout(state_out, self._config.dropout)
 			out = layers.fully_connected(state_out, num_actions, activation_fn=None)
 		return out
 

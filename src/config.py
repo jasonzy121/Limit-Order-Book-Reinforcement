@@ -12,6 +12,7 @@ class Config:
 		self.eps_begin = 1.0
 		self.eps_end = 0.1
 		self.nsteps = 1000
+		self.dropout= 0.9
 
 		self.lr_begin = 0.00025
 		self.lr_end = 0.00005

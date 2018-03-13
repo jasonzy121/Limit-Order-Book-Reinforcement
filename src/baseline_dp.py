@@ -19,8 +19,8 @@ parser.add_argument('--T', default=3, help='Time steps', type=int)
 parser.add_argument('--V', default=8000, help='Amount to trade', type=int)
 args = parser.parse_args()
 
-file_msg = '../datasets/LOBSTER_SampleFile_GOOG_2012-06-21_10/%s_2012-06-21_34200000_57600000_message_10.csv' % (args.tic)
-file_order = '../datasets/LOBSTER_SampleFile_GOOG_2012-06-21_10/%s_2012-06-21_34200000_57600000_orderbook_10.csv' % (args.tic)
+file_msg = '../datasets/%s_2012-06-21_34200000_57600000_message_10.csv' % (args.tic)
+file_order = '../datasets/%s_2012-06-21_34200000_57600000_orderbook_10.csv' % (args.tic)
 
 def optimal(time,start, H, lob, mq, T, current_mid_price, V):
 	# step is how much we move at each time.
