@@ -119,7 +119,12 @@ def generate_prices(lob, L):
 	"""
 	generate a list of action prices based on current lob info
 	"""
-	current_mid_price = lob.bid[0] + (lob.ask[0] - lob.bid[0]) // 2
+	if len(lob.ask) == 0:
+		current_mid_price = lob.bid[0]
+	elif len(lob.bid) == 0:
+		current_mid_price = lob.ask[0]
+	else:
+		current_mid_price = lob.bid[0] + (lob.ask[0] - lob.bid[0]) // 2
 	return np.arange(current_mid_price-(L//2)*args.base_point, current_mid_price+(L-L//2)*args.base_point, args.base_point)
 
 def get_state(lob):
@@ -128,10 +133,15 @@ def get_state(lob):
 	State 1: bid-ask spread
 	State 2: bid-ask volume misbalance
 	"""
-	spread = (lob.ask[0] - lob.bid[0])/100.0
-	state1 = 0 if spread < args.spread_cutoff else 1
-	state2 = np.sign(lob.ask_size[0] - lob.bid_size[0])
-	return [state1, state2]
+	if len(lob.ask) == 0:
+		return [1, 1]
+	elif len(lob.bid) == 0:
+		return [1, -1]
+	else:
+		spread = (lob.ask[0] - lob.bid[0])/100.0
+		state1 = 0 if spread < args.spread_cutoff else 1
+		state2 = np.sign(lob.ask_size[0] - lob.bid_size[0])
+		return [state1, state2]
 
 def simulate(lob, amount, a_price, time, next_time, mq):
 	"""
