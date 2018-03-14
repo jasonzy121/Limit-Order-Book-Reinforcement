@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow.contrib.layers as layers
 import os
 
-from config import Config
+from config_AMZN import Config
 from model_base import model
 from dqn_model import DQN
 
@@ -24,7 +24,6 @@ class Neural_DQN(DQN):
 
 if __name__ == '__main__':
 	config = Config()
-	config.model_output= '../output/neural_net'
 	model = Neural_DQN(config)
 	model.initialize()
 	model.train()

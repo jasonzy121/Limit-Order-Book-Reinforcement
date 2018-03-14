@@ -8,7 +8,7 @@ import tensorflow.contrib.layers as layers
 import os
 
 
-from config import Config
+from config_GOOG import Config
 from replay_buffer import ReplayBuffer
 from schedule import LinearSchedule
 from message_queue import Message_Queue
@@ -31,7 +31,7 @@ def evaluate_policy(m, oq, mq):
 		real_time = real_times[k]
 		states, reward, actions, done_mask = m.simulate_an_episode(V, T, 
 			H, real_time, order_direction,
-			m.get_random_action_fn(), depth)
+			m.get_best_action_fn(), depth)
 		print (reward)
 		rewards.append(np.sum(reward))
 		# Only append the final reward
@@ -62,9 +62,9 @@ def read_order_book(test_start, test_end, H, oq, mq):
 
 def main():
 	config = Config()
-	config.model_output= '../output/neural_net'
-	config.mode= 'test'
+	config.mode = 'test'
 	model = Neural_DQN(config)
+	model.initialize()
 	oq = Order_Queue(config.order_path)
 	mq = Message_Queue(config.message_path)
 	rewards= evaluate_policy(model, oq, mq)

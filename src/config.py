@@ -2,12 +2,12 @@ class Config:
 	def __init__(self):
 		self.mode = 'train'
 
-		self.nsteps_train = 1000000
+		self.nsteps_train = 1000
 		self.print_freq = 50
 		self.target_update_freq = 1000
-		self.saving_freq = 25000
+		self.saving_freq = 250
 		self.simulation_freq = 1000
-		self.model_output = '../output/'
+		self.model_output = '../output_GOOG/GOOG'
 
 		self.eps_begin = 1.0
 		self.eps_end = 0.1
