@@ -1,15 +1,18 @@
 class Config:
 	def __init__(self):
-		self.nsteps_train = 1000000
+		self.mode = 'train'
+
+		self.nsteps_train = 1000
 		self.print_freq = 50
 		self.target_update_freq = 1000
-		self.saving_freq = 25000
+		self.saving_freq = 250
 		self.simulation_freq = 1000
-		self.model_output = '../output/'
+		self.model_output = '../output_GOOG/GOOG'
 
 		self.eps_begin = 1.0
 		self.eps_end = 0.1
 		self.nsteps = 1000
+		self.dropout= 0.9
 
 		self.lr_begin = 0.00025
 		self.lr_end = 0.00005
@@ -31,7 +34,10 @@ class Config:
 		self.base_point = 100
 		self.train_start = 34200
 		self.train_end = 46800
-		self.I = 200000
+		self.test_start= 46800
+		self.test_end= 57600
+		self.I = 8000
+		self.hidden_size= 10
 
 		self.state_shape = [self.depth, 4]
 		self.state_history = 2

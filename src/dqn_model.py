@@ -2,8 +2,9 @@ import sys
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
+import os
 
-from config import Config
+from config_AMZN import Config
 from model_base import model
 
 class DQN(model):
@@ -81,9 +82,15 @@ class DQN(model):
 
 	def initialize(self):
 		self.sess = tf.Session()
-		self.sess.run(tf.global_variables_initializer())
-		self.sess.run(self.update_target_op)
 		self.saver = tf.train.Saver()
+		if self._config.mode == 'train':
+			self.sess.run(tf.global_variables_initializer())
+			print('running training mode')
+		elif self._config.mode == 'test':
+			self.saver.restore(self.sess, tf.train.latest_checkpoint(self._config.model_output))
+			print('running test mode')
+		self.sess.run(self.update_target_op)
+
 
 	def train(self):
 		self.sampling_buffer()
@@ -110,6 +117,7 @@ class DQN(model):
 		if t % self._config.target_update_freq == 0:
 			self.sess.run(self.update_target_op)
 		if t % self._config.saving_freq == 0:
+			print(self._config.model_output)
 			if not os.path.exists(self._config.model_output):
 				os.makedirs(self._config.model_output)
 			self.saver.save(self.sess, self._config.model_output)
@@ -134,6 +142,14 @@ class DQN(model):
 		state_book, state_it = state
 		q, = self.sess.run([self.q], feed_dict={self.s_book:state_book, self.s_it:state_it})
 		return q
+	
+	def get_best_action_fn(self):
+		print('get best action fn')
+		def action_fn(t, amount, state, mid_price):
+			action = self.get_best_action(state)[0]
+			price = (action-self._config.L//2) * self._config.base_point + mid_price
+			return (price, action)
+		return action_fn
 
 if __name__ == '__main__':
 	config = Config()

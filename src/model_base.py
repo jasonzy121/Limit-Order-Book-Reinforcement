@@ -110,6 +110,7 @@ class model(object):
 			if done_mask[-1]:
 				break
 			else:
+				# What is going on over here?
 				rewards.append(lob.own_reward - cum_reward)
 				cum_reward = lob.own_reward
 				amount_remain = lob.own_amount_to_trade
