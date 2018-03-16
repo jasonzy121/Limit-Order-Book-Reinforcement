@@ -2,12 +2,12 @@ class Config:
 	def __init__(self):
 		self.mode = 'train'
 
-		self.nsteps_train = 1000000
+		self.nsteps_train = 100000
 		self.print_freq = 50
 		self.target_update_freq = 1000
 		self.saving_freq = 25000
 		self.simulation_freq = 1000
-		self.model_output = '../output_AMZN_linear/AMZN'
+		self.model_output = '../output_AMZN_linear'
 
 		self.eps_begin = 1.0
 		self.eps_end = 0.1
@@ -25,7 +25,7 @@ class Config:
 
 		self.order_path = '../datasets/LOBSTER_SampleFile_AMZN_2012-06-21_10/AMZN_2012-06-21_34200000_57600000_orderbook_10.csv'
 		self.message_path = '../datasets/LOBSTER_SampleFile_AMZN_2012-06-21_10/AMZN_2012-06-21_34200000_57600000_message_10.csv'
-		self.depth = 3
+		self.depth = 30
 
 		self.H = 600
 		self.T = 20

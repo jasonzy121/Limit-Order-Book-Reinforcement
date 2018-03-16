@@ -8,7 +8,7 @@ import tensorflow.contrib.layers as layers
 import os
 
 
-from config_GOOG import Config
+from config_AMZN import Config
 from replay_buffer import ReplayBuffer
 from schedule import LinearSchedule
 from message_queue import Message_Queue
@@ -27,7 +27,6 @@ def evaluate_policy(m, oq, mq):
 	episodes, real_times = load_episodes(test_start, test_end, order_direction, H, oq, mq)
 	for k in range(len(episodes)):
 		print ('I am at the %d episode'%(k))
-		episode = episodes[k] 
 		real_time = real_times[k]
 		states, reward, actions, done_mask = m.simulate_an_episode(V, T, 
 			H, real_time, order_direction,
@@ -63,7 +62,9 @@ def read_order_book(test_start, test_end, H, oq, mq):
 def main():
 	config = Config()
 	config.mode = 'test'
-	model = Neural_DQN(config)
+	config.dropout = 1.0
+	# model = Neural_DQN(config)
+	model = DQN(config)
 	model.initialize()
 	oq = Order_Queue(config.order_path)
 	mq = Message_Queue(config.message_path)
