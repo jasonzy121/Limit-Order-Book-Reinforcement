@@ -43,13 +43,11 @@ class model(object):
 
 	def get_action(self, state):
 		if np.random.random() < self._eps_schedule.get_epsilon():
-			print('not supposed to be here')
 			return self.get_random_action(state)[0]
 		else:
 			return self.get_best_action(state)[0]
 
 	def get_random_action_fn(self):
-		print('not supposed to be here')
 		def random_action_fn(t, amount, state, mid_price):
 			action = np.random.randint(self._config.L) # action = L for market order
 			price = (action-self._config.L//2) * self._config.base_point + mid_price

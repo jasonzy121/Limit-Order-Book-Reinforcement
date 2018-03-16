@@ -120,7 +120,7 @@ class DQN(model):
 			print(self._config.model_output)
 			if not os.path.exists(self._config.model_output):
 				os.makedirs(self._config.model_output)
-			self.saver.save(self.sess, self._config.model_output)
+			self.saver.save(self.sess, save_path=os.path.join(self._config.model_output, 'model'))
 		if t % self._config.simulation_freq == 0:
 			self.sampling_buffer()
 
