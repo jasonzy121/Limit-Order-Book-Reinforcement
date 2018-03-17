@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow.contrib.layers as layers
 import os
 
-from config_AMZN import Config
+from config_GOOG import Config
 from model_base import model
 from dqn_model import DQN
 
@@ -19,6 +19,7 @@ class Neural_DQN(DQN):
 			conv_2_flattened = layers.flatten(inputs=conv_2)
 			state_out = tf.concat([conv_2_flattened, state_it], axis=1)
 			state_out= tf.nn.dropout(state_out, self._config.dropout)
+			state_out= layers.fully_connected(state_out, num_outputs= self._config.hidden_size)
 			out = layers.fully_connected(state_out, num_actions, activation_fn=None)
 		return out
 

@@ -2,12 +2,12 @@ class Config:
 	def __init__(self):
 		self.mode = 'train'
 
-		self.nsteps_train = 100000
+		self.nsteps_train = 1000000
 		self.print_freq = 50
 		self.target_update_freq = 1000
 		self.saving_freq = 25000
 		self.simulation_freq = 1000
-		self.model_output = '../output_GOOG_linear'
+		self.model_output = '../output_GOOG_Neural'
 
 		self.eps_begin = 1.0
 		self.eps_end = 0.1
@@ -18,7 +18,7 @@ class Config:
 		self.lr_end = 0.00005
 		self.lr_nsteps = self.nsteps_train / 2
 
-		self.gamma = 0.99
+		self.gamma = 1
 		self.grad_clip = True
 		self.clip_val = 10
 		self.batch_size = 32
@@ -37,7 +37,7 @@ class Config:
 		self.test_start= 46800
 		self.test_end= 57600
 		self.I = 8000
-		self.hidden_size= 10
+		self.hidden_size= 20
 
 		self.state_shape = [self.depth, 4]
-		self.state_history = 2
+		self.state_history = 4
